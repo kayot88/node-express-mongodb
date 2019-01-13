@@ -1,6 +1,5 @@
-//authentificate
 const passport = require('passport');
-
+//wow
 exports.login = passport.authenticate('local', {
   failureRedirect: '/login',
   failureFlash: 'Passport or login is incorrect',
