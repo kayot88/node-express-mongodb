@@ -68,4 +68,5 @@ exports.updateAccount = async (req, res) => {
   );
   req.flash('success', 'your account was changed');
   res.redirect('/');
-}
+};
+
