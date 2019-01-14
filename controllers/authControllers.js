@@ -1,14 +1,10 @@
 const passport = require('passport');
-<<<<<<< HEAD
-//wow
-=======
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const promisify = require('es6-promisify');
 
 
->>>>>>> dev
 exports.login = passport.authenticate('local', {
   failureRedirect: '/login',
   failureFlash: 'Passport or login is incorrect',
