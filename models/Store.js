@@ -35,7 +35,11 @@ const storeSchema = mongoose.Schema({
     }
   },
   photo: String,
-
+  author: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: 'Yoy must supply the author'
+  }, 
 });
 
 // storeSchema.statics.getTagsList = function () {
