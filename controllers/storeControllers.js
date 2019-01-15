@@ -16,19 +16,19 @@ const multerOptions = {
       }, false);
     }
   }
-}
+};
 
 exports.addStore = (req, res) => {
   res.render('editStore')
-}
+};
 
 exports.getStores = async (req, res) => {
   const stores = await Store.find();
   res.render('stores', {
     title: 'stores',
     stores
-  })
-}
+  });
+};
 
 
 
@@ -45,20 +45,27 @@ exports.resize = async (req, file, next) => {
   await photo.resize(800, jimp.AUTO);
   await photo.write(`./public/uploads/${req.body.photo}`);
   next();
-}
-
+};
 
 
 exports.createStore = async (req, res) => {
+  req.body.author = req.user._id;
   const store = await (new Store(req.body).save());
   req.flash('success', `stop ${store.name}`)
   res.redirect(`/store/${store.slug}`);
 }
 
+const confirmOwner = (store, user) => {
+  if (!store.author.equals(user._id)) {
+    throw Error('You are not owner')
+  }
+};
+
 exports.editStore = async (req, res) => {
   const store = await Store.findOne({
     _id: req.params.id
-  })
+  });
+  confirmOwner(store, req.user);
   // res.send(store)
   res.render('editStore', {
     title: `edit ${store.name}`,
@@ -82,12 +89,12 @@ exports.updateStore = async (req, res) => {
 exports.getStoreBySlug = async (req, res) => {
   const store = await Store.findOne({
     name: req.params.slug
-  })
+  }).populate('author');
   res.render(`store`, {
     store,
     title: store.name
-  })
-}
+  });
+};
 
 exports.getStoreByTag = async (req, res) => {
   const tag = req.params.tag

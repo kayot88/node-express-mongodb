@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const promisify = require('es6-promisify');
-
+const mail = require('../handlers/mail');
 
 exports.login = passport.authenticate('local', {
   failureRedirect: '/login',
@@ -35,15 +35,22 @@ exports.forgot = async (req, res) => {
   });
   if (!user) {
     req.flash('error', 'there are no user with that email');
-    res.redirect('/login');
+   return res.redirect('/login');
   }
   //2. reset pass
   user.resetPasswordToken = crypto.randomBytes(20).toString('hex');
   user.resetPasswordExpired = Date.now() + 360000;
   await user.save();
   //3.send email for user with token
-  const resetUrl = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`;
-  req.flash('success', `you have been emailed a password reset link ${resetUrl}`);
+  const resetURL = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`;
+  await mail.send({
+    user,
+    filename: 'password-reset',
+    subject: 'Reset password',
+    resetURL
+  });
+console.log(resetURL);
+  req.flash('success', `you have been emailed a password reset link`);
   res.redirect('/login')
 };
 
@@ -59,7 +66,8 @@ exports.reset = async (req, res) => {
     return res.redirect('/login');
   }
   res.render('reset', {
-    title: 'reset rassword'
+    title: 'reset rassword',
+    resetURL
   });
 };
 
@@ -92,3 +100,5 @@ exports.update = async (req, res) => {
   req.flash('success', 'your password changed and you are redirected');
   res.redirect('/');
 };
+
+
