@@ -119,7 +119,7 @@ exports.getStoreByTag = async (req, res) => {
     stores
   })
   // res.json(result)
-};
+}; 
 
 exports.searchStores = async (req, res) => {
   const stores = await Store
