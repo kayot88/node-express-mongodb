@@ -39,16 +39,9 @@ const storeSchema = mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: 'Yoy must supply the author'
-  }, 
+  },
 });
 
-// storeSchema.statics.getTagsList = function () {
-//   return this.aggregate([
-//     {$unwind: {path: "$tags"}}
-//   // includeArrayIndex: "arrayIndex"
-//     // {cursor: {}}
-//   ]);
-// }
 
 storeSchema.pre('save', async function (next) {
   if (!this.isModified('name')) {
@@ -67,13 +60,31 @@ storeSchema.pre('save', async function (next) {
 });
 
 storeSchema.statics.getTagsList = function () {
-  return this.aggregate([
-    { $unwind: '$tags' },
-    { $group: { _id: '$tags', count: { $sum: 1 } } },
-    { $sort: { count: -1 } }
+  return this.aggregate([{
+      $unwind: '$tags'
+    },
+    {
+      $group: {
+        _id: '$tags',
+        count: {
+          $sum: 1
+        }
+      }
+    },
+    {
+      $sort: {
+        count: -1
+      }
+    }
   ]);
 };
+ 
 
+
+storeSchema.index({
+  name: 'text',
+  description: 'text'
+});
 
 
 module.exports = mongoose.model('Store', storeSchema);

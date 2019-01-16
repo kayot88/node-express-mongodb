@@ -86,11 +86,16 @@ exports.updateStore = async (req, res) => {
   res.redirect(`/stores/${store._id}/edit`);
 }
 
-exports.getStoreBySlug = async (req, res) => {
+exports.getStoreBySlug = async (req, res, next) => {
   const store = await Store.findOne({
-    name: req.params.slug
+    slug: req.params.slug
   }).populate('author');
-  res.render(`store`, {
+  // console.log(store);
+  if (!store) {
+    return next()
+  }
+
+  res.render('store', {
     store,
     title: store.name
   });
@@ -98,7 +103,9 @@ exports.getStoreBySlug = async (req, res) => {
 
 exports.getStoreByTag = async (req, res) => {
   const tag = req.params.tag
-  const tagQuery = tag || {$exists : true}
+  const tagQuery = tag || {
+    $exists: true
+  }
   const tragsPromise = Store.getTagsList();
   const storesPromise = Store.find({
     tags: tagQuery
@@ -112,4 +119,23 @@ exports.getStoreByTag = async (req, res) => {
     stores
   })
   // res.json(result)
-}
+};
+
+exports.searchStores = async (req, res) => {
+  const stores = await Store
+    .find({
+      $text: {
+        $search: req.query.q,
+      }
+    }, {
+      score: {
+        $meta: 'textScore'
+      }
+    })
+    .sort({
+      score: {
+        $meta: 'textScore'
+      }
+    })
+  res.json(stores);
+};
