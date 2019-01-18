@@ -983,6 +983,7 @@ Object.defineProperty(exports, "__esModule", {
 // import axios from 'axios';
 var axios = __webpack_require__(12);
 // const fetch = require('fetch');
+
 function searchResultHTML(stores) {
   return stores.map(function (store) {
     return '\n    <a href="/store/' + store.slug + '" class="search__result">\n      <strong>' + store.name + '</strong>\n    </a>\n    ';
@@ -1000,12 +1001,43 @@ function typeAhead(search) {
       return;
     }
     searchResult.style.display = 'block';
+    searchResult.innerHTML = '';
 
     axios.get('/api/search?q=' + this.value).then(function (res) {
       if (res.data.length) {
         searchResult.innerHTML = searchResultHTML(res.data);
+        // searchResult.firstChild.classList.add(activeClass);
       }
+    }).catch(function (err) {
+      console.error(err);
     });
+  });
+  inputSearch.on('keyup', function (e) {
+    if (![38, 40, 13].includes(e.keyCode)) {
+      return;
+    }
+    var activeClass = 'search__result--active';
+    var current = searchResult.querySelector('.' + activeClass);
+    var items = searchResult.querySelectorAll('.search__result');
+    var next = void 0;
+    if (e.keyCode === 40 && current) {
+      next = current.nextElementSibling || items[0];
+    } else if (e.keyCode === 40) {
+      next = items[0];
+    } else if (e.keyCode === 38 && current) {
+      next = current.previousElementSibling || items[items.length - 1];
+    } else if (e.keyCode === 38) {
+      next = items[items.length - 1];
+    } else if (e.keyCode === 13 && current.href) {
+      window.location = current.href;
+    }
+    console.log(next);
+    if (current) {
+      current.classList.remove(activeClass);
+    }
+    next.classList.add(activeClass);
+    // next.classList.add(activeClass);
+    // const current = 
   });
 };
 
