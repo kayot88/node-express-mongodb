@@ -49,6 +49,6 @@ catchErrors(authControllers.update)
 /* API
  */
 router.get('/api/search', catchErrors(storeControllers.searchStores));
-
+router.get('/api/stores/near', catchErrors(storeControllers.mapStores));
 
 module.exports = router;

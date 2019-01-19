@@ -1,6 +1,5 @@
-// import axios from 'axios';
-const axios = require('axios');
-// const fetch = require('fetch');
+import axios from 'axios';
+import dompurify from 'dompurify';
 
 function searchResultHTML(stores) {
   return stores.map((store) => {
@@ -23,15 +22,16 @@ function typeAhead(search) {
       return;
     }
     searchResult.style.display = 'block';
-    searchResult.innerHTML = '';
-
+    
     axios
-      .get(`/api/search?q=${this.value}`)
-      .then(res => {
-        if (res.data.length) {
-          searchResult.innerHTML = searchResultHTML(res.data);
-          // searchResult.firstChild.classList.add(activeClass);
-        }
+    .get(`/api/search?q=${this.value}`)
+    .then(res => {
+      if (res.data.length) {
+        searchResult.innerHTML = dompurify.sanitize(searchResultHTML(res.data));
+        // searchResult.firstChild.classList.add(activeClass);
+      } else {
+      searchResult.innerHTML = dompurify.sanitize(`<div class="search__result">There no data for ${this.value}</div>`)
+      };
       })
       .catch((err) => {
         console.error(err);
@@ -61,8 +61,6 @@ function typeAhead(search) {
      current.classList.remove(activeClass)
     }
     next.classList.add(activeClass);
-    // next.classList.add(activeClass);
-    // const current = 
   })
 };
 
