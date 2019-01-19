@@ -119,7 +119,7 @@ exports.getStoreByTag = async (req, res) => {
     stores
   })
   // res.json(result)
-}; 
+};
 
 exports.searchStores = async (req, res) => {
   const stores = await Store
@@ -141,7 +141,7 @@ exports.searchStores = async (req, res) => {
   res.json(stores);
 };
 
-exports.mapStores = async (req, res) => {
+  exports.mapStores = async (req, res) => {
   const coordinates = [req.query.lng, req.query.lat].map(parseFloat);
   const q = {
     location: {
@@ -154,7 +154,15 @@ exports.mapStores = async (req, res) => {
       }
     }
   };
-  
   const stores = await Store.find(q).select('name slug location description').limit(10)
   res.json(stores);
 }
+
+exports.mapPage = (req, res) => {
+  res.render('map', {
+    title: 'MAP'
+  });
+};
+
+
+
