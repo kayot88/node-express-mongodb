@@ -3,6 +3,7 @@ const Store = mongoose.model('Store');
 const multer = require('multer');
 const jimp = require('jimp');
 const uuid = require('uuid');
+const User = require('../models/User');
 
 const multerOptions = {
   storage: multer.memoryStorage(),
@@ -47,13 +48,12 @@ exports.resize = async (req, file, next) => {
   next();
 };
 
-
 exports.createStore = async (req, res) => {
   req.body.author = req.user._id;
   const store = await (new Store(req.body).save());
   req.flash('success', `stop ${store.name}`)
   res.redirect(`/store/${store.slug}`);
-}
+};
 
 const confirmOwner = (store, user) => {
   if (!store.author.equals(user._id)) {
@@ -71,7 +71,7 @@ exports.editStore = async (req, res) => {
     title: `edit ${store.name}`,
     store
   })
-}
+};
 
 exports.updateStore = async (req, res) => {
   req.body.location.type = 'Point';
@@ -84,7 +84,7 @@ exports.updateStore = async (req, res) => {
   req.flash('success', `secceccfully updated <strong>${store.name}</strong>. 
   <a href="/stores/${store.slug}">View store ➡️</a>`);
   res.redirect(`/stores/${store._id}/edit`);
-}
+};
 
 exports.getStoreBySlug = async (req, res, next) => {
   const store = await Store.findOne({
@@ -156,7 +156,7 @@ exports.searchStores = async (req, res) => {
   };
   const stores = await Store.find(q).select('name slug location description').limit(10)
   res.json(stores);
-}
+};
 
 exports.mapPage = (req, res) => {
   res.render('map', {
@@ -164,5 +164,14 @@ exports.mapPage = (req, res) => {
   });
 };
 
-
+exports.heartStore = async (req, res) => {
+   const hearts = req.user.hearts.map(obj => obj.toString());
+   const operator = hearts.includes(req.params.id) ? '$pull': '$addToSet';
+   const user = await User
+   .findByIdAndUpdate(req.user._id, 
+   {[operator] : {hearts: req.params.id}},
+   {new: true} 
+    )
+   res.json(user)
+};
 
