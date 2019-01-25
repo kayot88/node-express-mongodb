@@ -24,10 +24,25 @@ exports.addStore = (req, res) => {
 };
 
 exports.getStores = async (req, res) => {
-  const stores = await Store.find();
+  const limit = 4;
+  const page = req.params.page || 1;
+  const skip = (page * limit) - limit;
+  const storesPromise = Store
+    .find()
+    .skip(skip)
+    .limit(limit);
+
+  const countPromise = Store.count();
+  const [stores, count] = await Promise.all([storesPromise, countPromise]);
+  const pages = Math.ceil(count / limit);
+  console.log(pages);
+
   res.render('stores', {
-    title: 'stores',
-    stores
+    title: 'stores' + count,
+    stores,
+    count,
+    pages,
+    page
   });
 };
 
@@ -89,8 +104,7 @@ exports.updateStore = async (req, res) => {
 exports.getStoreBySlug = async (req, res, next) => {
   const store = await Store.findOne({
     slug: req.params.slug
-  }).populate('author');
-  // console.log(store);
+  }).populate('author reviews');
   if (!store) {
     return next()
   }
@@ -141,7 +155,7 @@ exports.searchStores = async (req, res) => {
   res.json(stores);
 };
 
-  exports.mapStores = async (req, res) => {
+exports.mapStores = async (req, res) => {
   const coordinates = [req.query.lng, req.query.lat].map(parseFloat);
   const q = {
     location: {
@@ -165,13 +179,35 @@ exports.mapPage = (req, res) => {
 };
 
 exports.heartStore = async (req, res) => {
-   const hearts = req.user.hearts.map(obj => obj.toString());
-   const operator = hearts.includes(req.params.id) ? '$pull': '$addToSet';
-   const user = await User
-   .findByIdAndUpdate(req.user._id, 
-   {[operator] : {hearts: req.params.id}},
-   {new: true} 
-    )
-   res.json(user)
+  const hearts = req.user.hearts.map(obj => obj.toString());
+  const operator = hearts.includes(req.params.id) ? '$pull' : '$addToSet';
+  const user = await User
+    .findByIdAndUpdate(req.user._id, {
+      [operator]: {
+        hearts: req.params.id
+      }
+    }, {
+      new: true
+    })
+  res.json(user)
 };
 
+exports.getHearts = async (req, res) => {
+  const stores = await Store.find({
+    _id: {
+      $in: req.user.hearts
+    }
+  });
+  res.render('stores', {
+    title: 'hearted stories',
+    stores
+  })
+};
+
+exports.getTopStores = async (req, res) => {
+  const stores = await Store.getTop();
+  res.render('topStores', {
+    stores,
+    title: '⭐Top stores!'
+  });
+}

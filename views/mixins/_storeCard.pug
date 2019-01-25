@@ -1,4 +1,5 @@
 mixin storeCard(store={})
+  //- pre= h.dump(store.reviews)
   .store
     .store__hero
       .store__actions
@@ -10,6 +11,10 @@ mixin storeCard(store={})
               - const heartClass = heartsList.includes(store._id.toString()) ? 'heart__button--hearted' : ''
               button.heart__button(type="submit" name='heart' class=heartClass)
                 != h.icon('heart')
+        if store.reviews 
+          .store__action.store__action--count
+              != h.icon('review')
+              span= store.reviews.length
         if user && store.author.equals(user._id) 
           .store__action.store__action--edit
             a(href=`/stores/${store._id}/edit`)
@@ -19,3 +24,4 @@ mixin storeCard(store={})
         a(href=`/store/${store.slug}`) #{store.name}
     .store__details
       p= store.description.split(' ').slice(0, 15).join(' ')
+
