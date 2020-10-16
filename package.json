@@ -16,7 +16,7 @@
   },
   "browserslist": "last 2 versions",
   "dependencies": {
-    "@babel/polyfill": "^7.2.5",
+    "@babel/polyfill": "^7.12.1",
     "axios": "^0.15.3",
     "body-parser": "^1.18.3",
     "browserslist": "^3.0.0",
